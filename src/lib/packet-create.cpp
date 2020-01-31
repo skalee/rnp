@@ -163,8 +163,8 @@ pgp_write_struct_seckey(pgp_dest_t *   dst,
                         pgp_key_pkt_t *seckey,
                         const char *   password)
 {
-    bool res = false;
-    int  oldtag = seckey->tag;
+    bool           res = false;
+    pgp_pkt_type_t oldtag = seckey->tag;
 
     seckey->tag = tag;
     if (encrypt_secret_key(seckey, password, NULL)) {

@@ -622,7 +622,7 @@ pgp_key_get_version(const pgp_key_t *key)
     return key->pkt.version;
 }
 
-int
+pgp_pkt_type_t
 pgp_key_get_type(const pgp_key_t *key)
 {
     return key->pkt.tag;
@@ -1279,7 +1279,7 @@ pgp_key_protect(pgp_key_t *                  key,
     // write the protected key to packets[0]
     if (!write_key_to_rawpacket(decrypted_seckey,
                                 pgp_key_get_rawpacket(key, 0),
-                                (pgp_pkt_type_t) pgp_key_get_type(key),
+                                pgp_key_get_type(key),
                                 format,
                                 new_password)) {
         goto done;
@@ -1324,11 +1324,8 @@ pgp_key_unprotect(pgp_key_t *key, const pgp_password_provider_t *password_provid
         seckey = decrypted_seckey;
     }
     seckey->sec_protection.s2k.usage = PGP_S2KU_NONE;
-    if (!write_key_to_rawpacket(seckey,
-                                pgp_key_get_rawpacket(key, 0),
-                                (pgp_pkt_type_t) pgp_key_get_type(key),
-                                key->format,
-                                NULL)) {
+    if (!write_key_to_rawpacket(
+          seckey, pgp_key_get_rawpacket(key, 0), pgp_key_get_type(key), key->format, NULL)) {
         goto done;
     }
     if (decrypted_seckey) {
