@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, [Ribose Inc](https://www.ribose.com).
+ * Copyright (c) 2017-2020, [Ribose Inc](https://www.ribose.com).
  * Copyright (c) 2009 The NetBSD Foundation, Inc.
  * All rights reserved.
  *
@@ -93,7 +93,7 @@ __RCSID("$NetBSD: create.c,v 1.38 2010/11/15 08:03:39 agc Exp $");
 #include "utils.h"
 
 static bool
-packet_matches(const pgp_rawpacket_t *pkt, const pgp_content_enum tags[], size_t tag_count)
+packet_matches(const pgp_rawpacket_t *pkt, const pgp_pkt_type_t tags[], size_t tag_count)
 {
     for (size_t i = 0; i < tag_count; i++) {
         if (pkt->tag == tags[i]) {
@@ -107,7 +107,7 @@ static bool
 write_matching_packets(pgp_dest_t *           dst,
                        const pgp_key_t *      key,
                        const rnp_key_store_t *keyring,
-                       const pgp_content_enum tags[],
+                       const pgp_pkt_type_t   tags[],
                        size_t                 tag_count)
 {
     for (size_t i = 0; i < pgp_key_get_rawpacket_count(key); i++) {
@@ -139,15 +139,11 @@ write_matching_packets(pgp_dest_t *           dst,
 bool
 pgp_write_xfer_key(pgp_dest_t *dst, const pgp_key_t *key, const rnp_key_store_t *keyring)
 {
-    static const pgp_content_enum pub_tags[] = {PGP_PTAG_CT_PUBLIC_KEY,
-                                                PGP_PTAG_CT_PUBLIC_SUBKEY,
-                                                PGP_PTAG_CT_USER_ID,
-                                                PGP_PTAG_CT_SIGNATURE};
-    static const pgp_content_enum sec_tags[] = {PGP_PTAG_CT_SECRET_KEY,
-                                                PGP_PTAG_CT_SECRET_SUBKEY,
-                                                PGP_PTAG_CT_USER_ID,
-                                                PGP_PTAG_CT_SIGNATURE};
-    bool                          res = false;
+    static const pgp_pkt_type_t pub_tags[] = {
+      PGP_PKT_PUBLIC_KEY, PGP_PKT_PUBLIC_SUBKEY, PGP_PKT_USER_ID, PGP_PKT_SIGNATURE};
+    static const pgp_pkt_type_t sec_tags[] = {
+      PGP_PKT_SECRET_KEY, PGP_PKT_SECRET_SUBKEY, PGP_PKT_USER_ID, PGP_PKT_SIGNATURE};
+    bool res = false;
 
     if (!pgp_key_get_rawpacket_count(key)) {
         return false;
@@ -162,10 +158,10 @@ pgp_write_xfer_key(pgp_dest_t *dst, const pgp_key_t *key, const rnp_key_store_t 
 }
 
 bool
-pgp_write_struct_seckey(pgp_dest_t *     dst,
-                        pgp_content_enum tag,
-                        pgp_key_pkt_t *  seckey,
-                        const char *     password)
+pgp_write_struct_seckey(pgp_dest_t *   dst,
+                        pgp_pkt_type_t tag,
+                        pgp_key_pkt_t *seckey,
+                        const char *   password)
 {
     bool res = false;
     int  oldtag = seckey->tag;
